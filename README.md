@@ -1,21 +1,90 @@
 # UI Lab 1
-![](terminal-icon.png)
-![](gui-icon.png)
+Result:
 
-Це одна з робіт, які доповнюють основний цикл лабораторних робіт #1-8 (проект **Banking**, [Netbeans](https://netbeans.org/)) з ООП.  Основна мета цих додаткових вправ - познайомитись з різними видами інтерфейсів користувача та засобами їх створення. Згадувані 'базові' роботи розміщено в [окремому репозиторії](https://github.com/liketaurus/OOP-JAVA) (якщо будете робити завдання на "4" або "5" раджу переглянути [діаграму класів](https://github.com/liketaurus/OOP-JAVA/blob/master/MyBank.png), аби розуміти які методи є у класів).
+![image](https://github.com/ppc-ntu-khpi/tui-ieni-nei/assets/113203792/d615fc0d-e7ec-44e3-908f-30ad3e101ac3)
 
-В ході першої роботи вам пропонується виконати **наступне завдання** - [Робота 1: TUI з Jexer](https://github.com/ppc-ntu-khpi/TUI-Lab1-Starter/blob/master/Lab%201%20-TUI/Lab%201.md)
-  
-**Додаткове завдання** (для тих хто зробив все і прагне більшого): [дивіться тут](https://github.com/ppc-ntu-khpi/TUI-Lab1-Starter/blob/master/Lab%201%20-TUI/Lab%201%20-%20add.md)
+TUIdemo.java:
+```java
+package com.mybank.tui;
 
-Всі необхідні бібліотеки містяться у теці [jars](https://github.com/ppc-ntu-khpi/TUI-Lab1-Starter/tree/master/jars). В тому числі - всі необхідні відкомпільовані класи з робіт 1-8 - файл [MyBank.jar](https://github.com/ppc-ntu-khpi/TUI-Lab1-Starter/blob/master/jars/MyBank.jar). Файл даних лежить у теці [data](https://github.com/ppc-ntu-khpi/TUI-Lab1-Starter/tree/master/data).
+import jexer.TAction;
+import jexer.TApplication;
+import jexer.TField;
+import jexer.TText;
+import jexer.TWindow;
+import jexer.event.TMenuEvent;
+import jexer.menu.TMenu;
 
----
-**УВАГА! Не забуваємо здавати завдання через Google Classroom та вказувати посилання на створений для вас репозиторій!**
+/**
+ *
+ * @author Alexander 'Taurus' Babich
+ */
+public class TUIdemo extends TApplication {
 
-Також пам'ятайте, що ніхто не заважає вам редагувати файл README у вашому репозиторії😉.
-А ще - дуже раджу спробувати нову фічу - інтеграцію з IDE REPL.it (хоч з таким завданням вона може й не впоратись, однак, цікаво ж!).
+    private static final int ABOUT_APP = 2000;
+    private static final int CUST_INFO = 2010;
 
-![](https://img.shields.io/badge/Made%20with-JAVA-red.svg)
-![](https://img.shields.io/badge/Made%20with-%20Netbeans-brightgreen.svg)
-![](https://img.shields.io/badge/Made%20at-PPC%20NTU%20%22KhPI%22-blue.svg) 
+    public static void main(String[] args) throws Exception {
+        TUIdemo tdemo = new TUIdemo();
+        (new Thread(tdemo)).start();
+    }
+
+    public TUIdemo() throws Exception {
+        super(BackendType.SWING);
+
+        addToolMenu();
+        //custom 'File' menu
+        TMenu fileMenu = addMenu("&File");
+        fileMenu.addItem(CUST_INFO, "&Customer Info");
+        fileMenu.addDefaultItem(TMenu.MID_SHELL);
+        fileMenu.addSeparator();
+        fileMenu.addDefaultItem(TMenu.MID_EXIT);
+        //end of 'File' menu
+
+        addWindowMenu();
+
+        //custom 'Help' menu
+        TMenu helpMenu = addMenu("&Help");
+        helpMenu.addItem(ABOUT_APP, "&About...");
+        //end of 'Help' menu
+
+        setFocusFollowsMouse(true);
+        //Customer window
+        ShowCustomerDetails();
+    }
+
+    @Override
+    protected boolean onMenu(TMenuEvent menu) {
+        if (menu.getId() == ABOUT_APP) {
+            messageBox("About", "\t\t\t\t\t   Just a simple Jexer demo.\n\nCopyright \u00A9 2019 Alexander \'Taurus\' Babich").show();
+            return true;
+        }
+        if (menu.getId() == CUST_INFO) {
+            ShowCustomerDetails();
+            return true;
+        }
+        return super.onMenu(menu);
+    }
+
+    private void ShowCustomerDetails() {
+        TWindow custWin = addWindow("Customer Window", 2, 1, 40, 10, TWindow.NOZOOMBOX);
+        custWin.newStatusBar("Enter valid customer number and press Show...");
+
+        custWin.addLabel("Enter customer number: ", 2, 2);
+        TField custNo = custWin.addField(24, 2, 3, false);
+        TText details = custWin.addText("Owner Name: \nAccount Type: \nAccount Balance: ", 2, 4, 38, 8);
+        custWin.addButton("&Show", 28, 2, new TAction() {
+            @Override
+            public void DO() {
+                try {
+                    int custNum = Integer.parseInt(custNo.getText());
+                    //details about customer with index==custNum
+                    details.setText("Owner Name: John Doe (id="+custNum+")\nAccount Type: 'Checking'\nAccount Balance: $200.00");
+                } catch (Exception e) {
+                    messageBox("Error", "You must provide a valid customer number!").show();
+                }
+            }
+        });
+    }
+}
+```
