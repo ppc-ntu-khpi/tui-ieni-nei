@@ -3,7 +3,11 @@ Result:
 
 ![image](https://github.com/ppc-ntu-khpi/tui-ieni-nei/assets/113203792/d615fc0d-e7ec-44e3-908f-30ad3e101ac3)
 
-TUIdemo.java:
+(read form test.dat file)
+
+![image](https://github.com/ppc-ntu-khpi/tui-ieni-nei/assets/113203792/1a674500-982d-4a02-bb88-97914d26f297)
+
+```TUIdemo.java:```
 ```java
 package com.mybank.tui;
 
@@ -14,6 +18,9 @@ import jexer.TText;
 import jexer.TWindow;
 import jexer.event.TMenuEvent;
 import jexer.menu.TMenu;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 /**
  *
@@ -78,8 +85,33 @@ public class TUIdemo extends TApplication {
             public void DO() {
                 try {
                     int custNum = Integer.parseInt(custNo.getText());
-                    //details about customer with index==custNum
-                    details.setText("Owner Name: John Doe (id="+custNum+")\nAccount Type: 'Checking'\nAccount Balance: $200.00");
+                    
+                    BufferedReader reader = new BufferedReader(new FileReader("test.dat"));
+                    String line;
+                    boolean found = false;
+                    while ((line = reader.readLine()) != null) {
+                        if (line.isEmpty()) continue; // Skip empty lines
+                        
+                        int customerNumber = Integer.parseInt(line);
+                        if (customerNumber == custNum) {
+                            found = true;
+                            String ownerName = reader.readLine();
+                            String accountType = reader.readLine().split("\\s+")[0];
+                            String accountBalance = reader.readLine().split("\\s+")[1];
+                            
+                            details.setText("Owner Name: " + ownerName + "\nAccount Type: '" + accountType + "'\nAccount Balance: $" + accountBalance);
+                            break;
+                        } else {
+                            reader.readLine();
+                            reader.readLine();
+                            reader.readLine();
+                        }
+                    }
+                    reader.close();
+
+                    if (!found) {
+                        messageBox("Error", "Customer not found!").show();
+                    }
                 } catch (Exception e) {
                     messageBox("Error", "You must provide a valid customer number!").show();
                 }
@@ -87,4 +119,5 @@ public class TUIdemo extends TApplication {
         });
     }
 }
+
 ```
